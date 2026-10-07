@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/format.dart';
 import '../../core/medical.dart';
 import '../../database/schema.dart';
+import '../../l10n/strings.dart';
 import '../../widgets/common.dart';
 import '../state/app_state.dart';
 import 'thyroid_form.dart';
@@ -187,7 +188,7 @@ class _CompareScreenState extends State<CompareScreen> {
 
     DropdownButtonFormField<int> picker(String label, int value, void Function(int) set) {
       return DropdownButtonFormField<int>(
-        value: value,
+        initialValue: value,
         decoration:
             InputDecoration(labelText: label, border: const OutlineInputBorder()),
         items: [
