@@ -1,17 +1,13 @@
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:share_plus/share_plus.dart';
 
-import '../../core/format.dart';
 import '../../services/backup_service.dart';
 import '../../widgets/common.dart';
 import '../state/app_state.dart';
 
+/// Sauvegarde / restauration par presse-papiers : aucun plugin natif,
+/// donc aucun risque de blocage de compilation Android.
 class BackupScreen extends StatefulWidget {
   const BackupScreen({super.key});
 
@@ -20,26 +16,28 @@ class BackupScreen extends StatefulWidget {
 }
 
 class _BackupScreenState extends State<BackupScreen> {
+  final _text = TextEditingController();
   bool busy = false;
+
+  @override
+  void dispose() {
+    _text.dispose();
+    super.dispose();
+  }
 
   void _msg(String text) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
   }
 
-  Future<void> _export() async {
+  Future<void> _copy() async {
     final st = context.read<AppState>();
     final s = st.s;
     setState(() => busy = true);
     try {
       final json = await st.exportBackupJson();
-      final dir = await getTemporaryDirectory();
-      final now = DateTime.now();
-      final name =
-          'thyroid_backup_${now.year}${two(now.month)}${two(now.day)}.json';
-      final file = File('${dir.path}/$name');
-      await file.writeAsString(json, flush: true);
-      await Share.shareXFiles([XFile(file.path)], subject: name);
+      await Clipboard.setData(ClipboardData(text: json));
+      _msg(s.t('backup_copied'));
     } catch (e) {
       _msg('${s.t('backup_error')} : $e');
     } finally {
@@ -47,33 +45,24 @@ class _BackupScreenState extends State<BackupScreen> {
     }
   }
 
+  Future<void> _paste() async {
+    final data = await Clipboard.getData(Clipboard.kTextPlain);
+    if (data?.text != null) _text.text = data!.text!;
+  }
+
   Future<void> _restore() async {
     final st = context.read<AppState>();
     final s = st.s;
     setState(() => busy = true);
     try {
-      final res = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: const ['json'],
-        withData: true,
-      );
-      if (res == null || res.files.isEmpty) return;
-      final f = res.files.single;
-      final String text;
-      if (f.bytes != null) {
-        text = utf8.decode(f.bytes!);
-      } else if (f.path != null) {
-        text = await File(f.path!).readAsString();
-      } else {
-        throw const FormatException('Fichier illisible');
-      }
-      final bundle = decodeBackup(text);
+      final bundle = decodeBackup(_text.text.trim());
       st.validateBundle(bundle);
       if (!mounted) return;
-      final ok = await confirmDialog(
-          context, s, '${s.t('restore_confirm')}\n\n${s.t('rows')} : ${bundle.totalRows}');
+      final ok = await confirmDialog(context, s,
+          '${s.t('restore_confirm')}\n\n${s.t('rows')} : ${bundle.totalRows}');
       if (!ok) return;
       await st.restoreBackup(bundle);
+      _text.clear();
       _msg(s.t('restore_done'));
     } catch (e) {
       _msg('${s.t('backup_error')} : $e');
@@ -93,19 +82,36 @@ class _BackupScreenState extends State<BackupScreen> {
           Text(s.t('backup_info')),
           const SizedBox(height: 16),
           FilledButton.icon(
-            onPressed: busy ? null : _export,
-            icon: const Icon(Icons.upload_file),
+            onPressed: busy ? null : _copy,
+            icon: const Icon(Icons.copy),
             label: Text(s.t('backup_export')),
           ),
-          const SizedBox(height: 12),
-          OutlinedButton.icon(
-            onPressed: busy ? null : _restore,
-            icon: const Icon(Icons.download),
-            label: Text(s.t('backup_restore')),
+          const SizedBox(height: 24),
+          TextField(
+            controller: _text,
+            minLines: 4,
+            maxLines: 8,
+            decoration: InputDecoration(
+              hintText: s.t('backup_hint'),
+              border: const OutlineInputBorder(),
+            ),
           ),
-          if (busy) const Padding(
-              padding: EdgeInsets.only(top: 16),
-              child: Center(child: CircularProgressIndicator())),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              OutlinedButton.icon(
+                onPressed: busy ? null : _paste,
+                icon: const Icon(Icons.paste),
+                label: Text(s.t('backup_paste')),
+              ),
+              const SizedBox(width: 12),
+              FilledButton.icon(
+                onPressed: busy ? null : _restore,
+                icon: const Icon(Icons.restore),
+                label: Text(s.t('backup_restore')),
+              ),
+            ],
+          ),
         ],
       ),
     );
