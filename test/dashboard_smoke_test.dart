@@ -14,8 +14,11 @@ void main() {
     final state = AppState(repo: MemoryRepository.seeded(), prefs: prefs);
     await state.load();
 
-    await tester.binding.setSurfaceSize(const Size(800, 3000));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
+    // Ecran logique 800 x 3000 (ratio 1.0) : evite les debordements de texte
+    // dus a la police de test, tres large, sur un ecran trop etroit.
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = const Size(800, 3000);
+    addTearDown(tester.view.reset);
 
     await tester.pumpWidget(
       ChangeNotifierProvider<AppState>.value(
@@ -31,6 +34,7 @@ void main() {
       ),
     );
     await tester.pump();
+    expect(tester.takeException(), isNull);
 
     expect(find.text('11.93'), findsOneWidget);
     expect(find.text('14'), findsOneWidget);
