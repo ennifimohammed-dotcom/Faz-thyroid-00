@@ -44,6 +44,7 @@ void main() {
           localizationsDelegates: [
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
           ],
           supportedLocales: [Locale('fr')],
           home: Scaffold(body: DashboardPage()),
