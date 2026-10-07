@@ -197,7 +197,7 @@ class _DoseFormScreenState extends State<DoseFormScreen> {
       saveLabel: s.t('save'),
       children: [
         DropdownButtonFormField<String>(
-          value: kind,
+          initialValue: kind,
           isExpanded: true,
           decoration: InputDecoration(
               labelText: s.t('kind'), border: const OutlineInputBorder()),
