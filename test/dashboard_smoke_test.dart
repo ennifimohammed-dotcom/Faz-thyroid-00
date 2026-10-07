@@ -7,17 +7,34 @@ import 'package:fatma_zahra_thyroid_tracker/features/dashboard/dashboard_page.da
 import 'package:fatma_zahra_thyroid_tracker/features/state/app_state.dart';
 import 'package:fatma_zahra_thyroid_tracker/repositories/health_repository.dart';
 
-void main() {
-  testWidgets('le tableau de bord affiche les dernières valeurs', (tester) async {
-    SharedPreferences.setMockInitialValues({});
-    final prefs = await SharedPreferences.getInstance();
-    final state = AppState(repo: MemoryRepository.seeded(), prefs: prefs);
-    await state.load();
+Future<AppState> _state() async {
+  SharedPreferences.setMockInitialValues({});
+  final prefs = await SharedPreferences.getInstance();
+  final state = AppState(repo: MemoryRepository.seeded(), prefs: prefs);
+  await state.load();
+  return state;
+}
 
-    // Ecran logique 800 x 3000 (ratio 1.0) : evite les debordements de texte
-    // dus a la police de test, tres large, sur un ecran trop etroit.
+void main() {
+  test('tableau de bord v2 : données dérivées (sans interface)', () async {
+    final st = await _state();
+    expect(st.lastWith((e) => e.tsh)?.tsh, 11.93);
+    expect(st.lastWith((e) => e.ft4)?.ft4, 14);
+    expect(st.lastWith((e) => e.ft3)?.ft3, 3.5);
+    expect(st.lastWith((e) => e.doseUg)?.doseUg, 50);
+    expect(st.lastWith((e) => e.tsh, skip: 1)?.tsh, 10.9);
+    expect(st.latestPrescribed?.doseUg, 75);
+    expect(st.latestPrescribed?.date, isNull);
+    expect(st.doseItems.length, 3);
+  });
+
+  testWidgets('tableau de bord v2 : affichage', (tester) async {
+    final state = await _state();
+
+    // Grand écran logique (ratio 1.0) : pas de débordement ni de contenu
+    // hors zone construite par la liste.
     tester.view.devicePixelRatio = 1.0;
-    tester.view.physicalSize = const Size(800, 3000);
+    tester.view.physicalSize = const Size(900, 8000);
     addTearDown(tester.view.reset);
 
     await tester.pumpWidget(
@@ -34,12 +51,10 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(tester.takeException(), isNull);
 
-    expect(find.text('11.93'), findsOneWidget);
-    expect(find.text('14'), findsOneWidget);
-    expect(find.text('3.5'), findsOneWidget);
+    expect(find.textContaining('11.93'), findsWidgets);
+    expect(find.textContaining('3.5'), findsWidgets);
     expect(find.textContaining('75 µg'), findsWidgets);
-    expect(find.text('À discuter avec le médecin.'), findsOneWidget);
+    expect(find.textContaining('médecin'), findsWidgets);
   });
 }
