@@ -154,7 +154,7 @@ class _SymptomFormState extends State<SymptomForm> {
       children: [
         DateField(controller: date, label: s.t('date'), s: s),
         DropdownButtonFormField<String>(
-          value: symptom,
+          initialValue: symptom,
           isExpanded: true,
           decoration: InputDecoration(
               labelText: s.t('symptom'), border: const OutlineInputBorder()),
