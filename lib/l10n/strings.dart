@@ -194,14 +194,17 @@ const Map<String, String> _fr = {
   'ref_note':
       'Modifiez ces intervalles selon le laboratoire. Valeurs initiales : celles du fichier Excel.',
   'backup_info':
-      'Exportez toutes les données dans un fichier JSON à conserver en lieu sûr. La restauration remplace les données actuelles.',
-  'backup_export': 'Exporter la sauvegarde',
-  'backup_restore': 'Restaurer une sauvegarde',
+      'Copiez toute la sauvegarde (texte JSON) dans le presse-papiers, puis collez-la dans un endroit sûr (Notes, e-mail à vous-même, WhatsApp). Pour restaurer, collez ce texte ci-dessous : il remplace les données actuelles.',
+  'backup_export': 'Copier la sauvegarde',
+  'backup_restore': 'Restaurer',
   'restore_confirm':
       'Les données actuelles seront remplacées par celles de la sauvegarde. Continuer ?',
   'rows': 'Lignes dans la sauvegarde',
   'restore_done': 'Sauvegarde restaurée.',
   'backup_error': 'Erreur',
+  'backup_copied': 'Sauvegarde copiée dans le presse-papiers.',
+  'backup_paste': 'Coller',
+  'backup_hint': 'Collez ici le texte de la sauvegarde',
 };
 
 const Map<String, String> _ar = {
@@ -379,12 +382,15 @@ const Map<String, String> _ar = {
   'ref_note':
       'عدّل هذه المجالات حسب المختبر. القيم الأولية هي الواردة في ملف Excel.',
   'backup_info':
-      'صدّر كل البيانات إلى ملف JSON واحتفظ به في مكان آمن. الاستعادة تستبدل البيانات الحالية.',
-  'backup_export': 'تصدير نسخة احتياطية',
-  'backup_restore': 'استعادة نسخة احتياطية',
+      'انسخ كل النسخة الاحتياطية (نص JSON) إلى الحافظة ثم الصقها في مكان آمن (ملاحظات، بريد إلكتروني لنفسك، واتساب). للاستعادة الصق النص أدناه: سيستبدل البيانات الحالية.',
+  'backup_export': 'نسخ النسخة الاحتياطية',
+  'backup_restore': 'استعادة',
   'restore_confirm':
       'سيتم استبدال البيانات الحالية ببيانات النسخة الاحتياطية. هل تريد المتابعة؟',
   'rows': 'عدد السجلات في النسخة',
   'restore_done': 'تمت استعادة النسخة الاحتياطية.',
   'backup_error': 'خطأ',
+  'backup_copied': 'تم نسخ النسخة الاحتياطية إلى الحافظة.',
+  'backup_paste': 'لصق',
+  'backup_hint': 'الصق هنا نص النسخة الاحتياطية',
 };
